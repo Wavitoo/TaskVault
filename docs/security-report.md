@@ -83,6 +83,9 @@ or genuinely discovered through the process (build/config issues).
   A scan that runs only on push cannot see this class of problem.
 - **Remediation**: `npm audit fix` and `npm update express pg` (express 5.2.1 to 5.3.0, no breaking change); `npm audit --audit-level=high` is now clean.
   Two MEDIUM findings remain in `nodemon`/`minimatch` (dev-only, not in the image): documented in SECURITY.md.
+- **OS packages**: a full-severity Trivy scan of the rebuilt image then listed 11 MEDIUM findings in Alpine packages (OpenSSL 3.5.9-r0, zlib 1.3.2-r1),
+  all with a fix available. `RUN apk upgrade --no-cache` in the runtime stage of the Dockerfile applies them: 0 fixable findings remain, all severities.
+  Trade-off: the build depends on the state of the Alpine repositories when it runs; reproducibility comes from deploying the image by digest, not from rebuilding.
 - **Prevention**: weekly scheduled rescan (`.github/workflows/scheduled-scan.yml`) and Dependabot.
 
 ## 10. Documented Follow-ups Implemented (v1.2)
