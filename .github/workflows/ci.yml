@@ -124,11 +124,11 @@ jobs:
 
       - name: Run ZAP baseline scan
         run: |
-          docker run --rm --network devsecops-security-pipeline_default \
+          docker run --rm --network taskvault_default \
             -v "${{ github.workspace }}/zap-output:/zap/wrk/:rw" \
             ghcr.io/zaproxy/zaproxy:stable \
             zap-baseline.py \
-            -t http://devsecops-security-pipeline-backend-1:3000 \
+            -t http://taskvault-backend-1:3000 \
             -r zap-ci-report.html \
             -I
 

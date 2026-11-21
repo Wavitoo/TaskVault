@@ -1,12 +1,12 @@
-# TaskVault — DevSecOps Security Pipeline
+# TaskVault: DevSecOps Security Pipeline
 
 A complete DevSecOps pipeline built from scratch around a small Node.js/Express/PostgreSQL API, demonstrating shift-left security practices integrated into every stage of the software development lifecycle.
 
-This is not a collection of security tools bolted onto an app — it's a working CI/CD pipeline where each security gate was tested against both clean code and intentionally vulnerable code, with every incident documented.
+This is not a collection of security tools bolted onto an app, it's a working CI/CD pipeline where each security gate was tested against both clean code and intentionally vulnerable code, with every incident documented.
 
 ## 1. Project Overview
 
-TaskVault is a minimal task-management API (register, login, CRUD tasks) — deliberately simple so the focus stays on the security pipeline wrapped around it, not the application's business logic.
+TaskVault is a minimal task-management API (register, login, CRUD tasks), deliberately simple so the focus stays on the security pipeline wrapped around it, not the application's business logic.
 
 ## 2. Objectives
 
@@ -66,24 +66,24 @@ See the live workflow: .github/workflows/ci.yml
 
 ## 7. Security Controls (Detail)
 
-### SAST — Semgrep
+### SAST: Semgrep
 Runs the auto ruleset plus a custom taint-mode rule (security/sast/custom-rules.yml) written specifically because generic rulesets failed to detect the SQL injection demo (a documented false negative, see report). The custom rule tracks tainted input (req.query/body/params) to the raw SQL string argument of pool.query() specifically, correctly ignoring safely-parameterized values.
 
-### SCA — Dependency Audit
+### SCA: Dependency Audit
 npm audit --audit-level=high blocks on HIGH/CRITICAL CVEs. Demonstrated against lodash@4.17.4 (10 known advisories, including CVE-2019-10744).
 
-### Secret Detection — Gitleaks
+### Secret Detection: Gitleaks
 Full git history scan (fetch-depth: 0). Demonstrated two-layer defense: a Stripe-formatted fake key was blocked by GitHub's native Push Protection before even reaching CI; a generic high-entropy token bypassed that and was caught by Gitleaks in the pipeline instead.
 
-### Container Security — Trivy
+### Container Security: Trivy
 Scans the built image for OS and application-level CVEs. A real Dockerfile bug (missing .dockerignore, causing stale local node_modules to leak into the image) was discovered via this scan, not staged. npm/npx/yarn are stripped from the final runtime image to eliminate their own internal CVEs and reduce attack surface.
 
-### DAST — OWASP ZAP
+### DAST: OWASP ZAP
 Baseline (passive) scan against the live container. Found 4 real header misconfigurations; fixed 2 via helmet (X-Powered-By leak, missing Permissions-Policy), documented 2 as accepted risk (both only affect nonexistent 404 pages).
 
 ## 8. Threat Modeling
 
-Full STRIDE analysis of the architecture: security/threat-model/STRIDE.md — 12 identified threats with mitigation status. The 3 follow-ups it documented (rate limiting, JWT revocation, DB port exposure) are now implemented and tested; the remaining open items are listed in the file.
+Full STRIDE analysis of the architecture: security/threat-model/STRIDE.md, 12 identified threats with mitigation status. The 3 follow-ups it documented (rate limiting, JWT revocation, DB port exposure) are now implemented and tested; the remaining open items are listed in the file.
 
 ## 9. Security Gates
 
@@ -100,13 +100,13 @@ Full policy: SECURITY.md
 8 real findings/incidents: 3 intentional demos plus 5 genuinely discovered while building this. Full write-up with CWE/CVSS/OWASP mapping, proof of concept, and verification for each: docs/security-report.md
 
 Highlights:
-- A false-green Security Gate (deprecated Semgrep action silently crashed but reported success) — arguably the most important finding, since a broken gate is worse than no gate.
+- A false-green Security Gate (deprecated Semgrep action silently crashed but reported success), arguably the most important finding, since a broken gate is worse than no gate.
 - A supply-chain risk in our own pipeline (mutable GitHub Action tags), caught by Semgrep's own rule, including automatically catching a second instance added later.
 - A build reproducibility bug where local filesystem state leaked into a supposedly clean Docker image.
 
 ## 11. Accepted Risks
 
-Documented in SECURITY.md — every non-blocking finding has a written justification, not a silent suppression.
+Documented in SECURITY.md, every non-blocking finding has a written justification, not a silent suppression.
 
 ## 12. Lessons Learned
 
@@ -136,7 +136,7 @@ DevSecOps, CI/CD (GitHub Actions), Application Security, SAST, SCA, DAST, Contai
 
 ## Project Structure
 
-devsecops-security-pipeline/
+TaskVault/
 - README.md
 - SECURITY.md
 - .github/workflows/ci.yml
@@ -147,3 +147,7 @@ devsecops-security-pipeline/
 - docs/architecture.md
 - docs/security-report.md
 - docs/monitoring.md
+
+## License
+
+MIT, see [LICENSE](LICENSE).
