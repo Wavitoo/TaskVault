@@ -4,18 +4,21 @@ version: 2
 updates:
   - package-ecosystem: npm
     directory: /backend
+    target-branch: develop   # respecte le flux feature, develop, release, main
     schedule:
       interval: weekly
     cooldown:
       default-days: 7   # attendre 7 jours avant de proposer une version tout juste publiée (peut être malveillante)
   - package-ecosystem: github-actions
     directory: /
+    target-branch: develop   # respecte le flux feature, develop, release, main
     schedule:
       interval: weekly
     cooldown:
       default-days: 7   # attendre 7 jours avant de proposer une version tout juste publiée (peut être malveillante)
   - package-ecosystem: docker
     directory: /backend
+    target-branch: develop   # respecte le flux feature, develop, release, main
     schedule:
       interval: weekly
     cooldown:

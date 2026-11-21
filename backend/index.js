@@ -30,7 +30,7 @@ app.use((req, res, next) => {
 
 app.use(express.json());
 
-// Cache-Control: no-store sur toutes les routes API — les réponses (tokens, données
+// Cache-Control: no-store sur toutes les routes API, les réponses (tokens, données
 // utilisateur) ne doivent jamais être mises en cache par un intermédiaire
 app.use((req, res, next) => {
   res.set('Cache-Control', 'no-store');
