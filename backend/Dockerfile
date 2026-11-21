@@ -1,5 +1,5 @@
 # --- Stage 1: Build ---
-FROM node:24-alpine AS builder
+FROM node:26-alpine AS builder
 
 WORKDIR /app
 
@@ -9,7 +9,7 @@ RUN npm ci --omit=dev
 COPY . .
 
 # --- Stage 2: Runtime ---
-FROM node:24-alpine
+FROM node:26-alpine
 
 # Applique les correctifs de sécurité des paquets système (OpenSSL, zlib...) publiés depuis la construction de
 # l'image de base : le tag node:24-alpine peut être en retard sur les correctifs Alpine. Compromis assumé : le build

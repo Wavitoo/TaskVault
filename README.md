@@ -11,7 +11,7 @@ TaskVault is a minimal task-management API (register, login, CRUD tasks), delibe
 ## 2. Objectives
 
 - Understand and demonstrate the DevSecOps philosophy: security as a continuous, automated part of the SDLC, not a manual gate at the end
-- Build a real CI/CD pipeline with 6 automated security controls (SAST, SCA, Secret Detection, Container Security, DAST, plus unit tests)
+- Build a real CI/CD pipeline with 6 automated checks: 5 security controls (SAST, SCA, Secret Detection, Container Security, DAST) plus unit tests
 - Prove each control actually works: not just installed, but validated against real vulnerable code in isolated demo branches
 - Document every real incident encountered while building it (8 in total, see docs/security-report.md)
 
@@ -26,7 +26,7 @@ Developer
    - Secret Detection (Gitleaks, full history scan)
    - Container Security (Trivy, blocks fixable HIGH/CRITICAL)
    - DAST (OWASP ZAP baseline scan against live container)
--> Security Gate (all 6 must pass)
+-> Security Gate (required checks must pass, see section 6)
 -> Merge to develop/main (branch-protected, admin included)
 
 Full architecture diagram and component explanations: docs/architecture.md
@@ -60,7 +60,7 @@ Shift-left security means catching issues as early as possible in the SDLC, wher
 
 ## 6. CI/CD Pipeline
 
-6 jobs run in parallel on every pull request targeting main or develop. All 6 are required status checks: no merge is possible, even for the repo admin, unless every job is green (enforce_admins: true on both branches).
+6 jobs run in parallel on every pull request targeting main or develop: unit tests plus 5 security controls. Merge protection (enforce_admins: true, so it applies to the repo admin too): `develop` requires 5 of them (tests, SAST, SCA, Gitleaks, Trivy); `main` requires the unit tests, because it only receives release branches that already passed on `develop`. DAST runs on every pull request but is not a required check (it fails only on confirmed FAIL findings, see SECURITY.md).
 
 See the live workflow: .github/workflows/ci.yml
 
