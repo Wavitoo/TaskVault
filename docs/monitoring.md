@@ -18,8 +18,7 @@ capture as structured security logs, distinct from generic application logs:
 - Failed login attempts (potential brute-force indicator)
 - JWT verification failures (potential forged/tampered token attempts)
 - 401/403 responses on /api/tasks routes (potential IDOR probing)
-- Rate limit triggers (once rate limiting is implemented, per the threat model
-  follow-ups in STRIDE.md)
+- Rate limit triggers (rate limiting is now implemented on /api/auth, see STRIDE.md)
 
 ## Link to SOC Home Lab (Wazuh)
 

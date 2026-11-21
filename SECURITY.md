@@ -67,13 +67,18 @@ with justification:
    (content is correctly NOT cached, per our `Cache-Control: no-store` header)
    is the desired secure outcome.
 
+4. **npm audit: `minimatch` via `nodemon` (MEDIUM, GHSA-g3hv-75wg-m249)**
+   `nodemon` is a development dependency only: it is not installed in the runtime image
+   (`npm ci --omit=dev`) and is never reachable from the network. The only automatic
+   fix (`npm audit fix --force`) *downgrades* nodemon, so it is not applied. Below the
+   blocking threshold (HIGH/CRITICAL). Reviewed again at each Dependabot update.
+
 ## Known Limitations
 
 - Solo-maintainer project: PR review count is 0; automated checks are the
   primary review mechanism, not human code review.
 - DAST baseline scan is passive-only; no active scan (real exploitation attempts)
   is run in CI to keep pipeline runtime reasonable for a portfolio project.
-- Container scan only checks the final built image against the Trivy vulnerability
-  database at scan time; it does not run on a schedule, so newly disclosed CVEs
-  in already-deployed images are not automatically re-flagged (would require a
-  scheduled workflow in a production setting).
+- The weekly scheduled rescan (`scheduled-scan.yml`) re-checks dependencies and the image against the latest
+  vulnerability database, but it only *alerts* (failed workflow, e-mail): it does not open fixes automatically.
+- Rate limiting is per instance and limited to /api/auth; there is no refresh-token rotation (see STRIDE.md).

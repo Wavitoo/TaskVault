@@ -73,6 +73,25 @@ or genuinely discovered through the process (build/config issues).
 - **Root cause**: Deprecated third-party wrapper with an outdated Semgrep engine bundled inside, incompatible with newer community rule severities.
 - **Remediation**: Replaced with the official `semgrep/semgrep` Docker image, calling `semgrep scan` directly with `--error`, matching local testing behavior exactly.
 
+## 9. Dependencies Drifted After the Build (Real Finding)
+
+- **Component**: `backend/package-lock.json` (transitive dependencies of `express`)
+- **Detection**: the weekly Trivy rescan of the *deployed* image in the sibling project taskvault-platform found `proxy-addr@2.0.7`
+  (CVE-2026-90711, **CRITICAL**, IP spoofing via IPv4-mapped IPv6 trust subnet, fixed in 2.0.8) and `body-parser@2.3.0`
+  (CVE-2026-111181, HIGH, denial of service, fixed in 2.4.0). A fresh `npm audit` then listed 6 findings (1 critical, 2 high, 3 moderate) including `qs`.
+- **Why the pipeline missed it**: the dependencies were clean when the image was built; the advisories were published afterwards.
+  A scan that runs only on push cannot see this class of problem.
+- **Remediation**: `npm audit fix` and `npm update express pg` (express 5.2.1 to 5.3.0, no breaking change); `npm audit --audit-level=high` is now clean.
+  Two MEDIUM findings remain in `nodemon`/`minimatch` (dev-only, not in the image): documented in SECURITY.md.
+- **Prevention**: weekly scheduled rescan (`.github/workflows/scheduled-scan.yml`) and Dependabot.
+
+## 10. Documented Follow-ups Implemented (v1.2)
+
+- **Rate limiting** on `/api/auth` (10 / 15 min / IP), tested. Limit: counter is per instance.
+- **JWT revocation**: `jti` on every token, `POST /api/auth/logout`, `revoked_tokens` table checked on each request. Tests include a
+  mutation check: with the revocation check disabled, 2 tests fail. Limit: no refresh-token rotation.
+- **DB port** published on `127.0.0.1` only in `docker-compose.yml`.
+
 ## Summary Table
 
 | # | Finding | Severity | Type | Status |
@@ -85,3 +104,5 @@ or genuinely discovered through the process (build/config issues).
 | 6 | Missing HTTP headers | Medium | Real | Fixed (2/4), 2 accepted |
 | 7 | Mutable Action tags | Critical (supply chain) | Real | Fixed |
 | 8 | False-green SAST gate | Critical (process) | Real | Fixed |
+| 9 | Dependencies drifted after build (proxy-addr CRITICAL, body-parser HIGH) | Critical | Real | Fixed (2 MEDIUM dev-only accepted) |
+| 10 | Follow-ups: rate limiting, JWT revocation, DB port | High | Hardening | Implemented, limits documented |
