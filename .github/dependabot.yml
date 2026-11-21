@@ -1,0 +1,22 @@
+# Mises à jour automatiques sous forme de PR (donc soumises aux 5 contrôles de sécurité avant fusion).
+# Les actions GitHub sont épinglées par SHA : Dependabot met à jour le SHA ET le commentaire de version.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /backend
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7   # attendre 7 jours avant de proposer une version tout juste publiée (peut être malveillante)
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7   # attendre 7 jours avant de proposer une version tout juste publiée (peut être malveillante)
+  - package-ecosystem: docker
+    directory: /backend
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7   # attendre 7 jours avant de proposer une version tout juste publiée (peut être malveillante)

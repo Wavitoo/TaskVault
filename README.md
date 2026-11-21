@@ -83,7 +83,7 @@ Baseline (passive) scan against the live container. Found 4 real header misconfi
 
 ## 8. Threat Modeling
 
-Full STRIDE analysis of the architecture: security/threat-model/STRIDE.md — 12 identified threats, mitigation status, and 3 documented follow-ups (rate limiting, JWT revocation, DB port exposure) intentionally left as future work.
+Full STRIDE analysis of the architecture: security/threat-model/STRIDE.md — 12 identified threats with mitigation status. The 3 follow-ups it documented (rate limiting, JWT revocation, DB port exposure) are now implemented and tested; the remaining open items are listed in the file.
 
 ## 9. Security Gates
 
@@ -117,10 +117,18 @@ Documented in SECURITY.md — every non-blocking finding has a written justifica
 
 ## 13. Future Improvements
 
-- Rate limiting on auth endpoints
-- JWT revocation / refresh token rotation
-- Scheduled (not just on-push) container rescans for newly disclosed CVEs
+- Refresh-token rotation (tokens currently live 1 hour; a token stolen before logout stays valid until expiry)
+- Shared rate-limit counter (Redis): the current in-memory counter is per instance, so N replicas allow N x 10 attempts
+- Rate limiting beyond /api/auth, and alerting on repeated failures
 - Full Wazuh/SIEM log shipping integration (see docs/monitoring.md)
+
+Done since v1.0: rate limiting on auth, JWT revocation (logout), DB port bound to localhost, weekly scheduled rescan
+(see `.github/workflows/scheduled-scan.yml`), Dependabot, and the dependency fixes found by the rescan.
+
+## Related project
+
+[taskvault-platform](https://github.com/Wavitoo/taskvault-platform) deploys this application on Kubernetes (Terraform, Argo CD, Kyverno, Cosign,
+Vault, Falco). This repository secures the **code**; that one secures the **deployment and runtime**.
 
 ## Skills Demonstrated
 
