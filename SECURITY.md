@@ -35,7 +35,7 @@ This project's CI/CD pipeline enforces the following policy across all security 
 |------|-----------------|----------|
 | Semgrep (SAST) | `--error` | Blocks on any finding classified `ERROR` severity |
 | npm audit (SCA) | `--audit-level=high` | Blocks on HIGH or CRITICAL severity CVEs only |
-| Gitleaks (Secrets) | full history scan (`fetch-depth: 0`) | Blocks on any detected secret, no severity threshold — a leaked secret is always critical |
+| Gitleaks (Secrets) | full history scan (`fetch-depth: 0`) | Blocks on any detected secret, no severity threshold, a leaked secret is always critical |
 | Trivy (Container) | `--severity CRITICAL,HIGH --exit-code 1 --ignore-unfixed` | Blocks on fixable CRITICAL/HIGH CVEs; CVEs with no available patch are logged but non-blocking (no actionable remediation exists yet) |
 | OWASP ZAP (DAST) | `-I` flag | Blocks only on `FAIL` (active exploitation confirmed); `WARN` findings are reviewed manually (see Accepted Risks) |
 

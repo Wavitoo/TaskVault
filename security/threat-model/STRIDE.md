@@ -1,4 +1,4 @@
-# Threat Model — TaskVault (STRIDE)
+# Threat Model: TaskVault (STRIDE)
 
 ## Architecture Overview
 
