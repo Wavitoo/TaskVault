@@ -1,0 +1,37 @@
+name: Scheduled scan
+
+# Une image ou une dépendance peut être saine à la construction et vulnérable une semaine plus tard
+# (nouvelles CVE publiées). Ce rescan hebdomadaire échoue si une faille HIGH/CRITICAL corrigeable apparaît :
+# GitHub envoie alors un e-mail d'échec. C'est la limite que le rapport de sécurité listait ("pas de scan planifié").
+on:
+  schedule:
+    - cron: "23 5 * * 1"   # lundi 05:23 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rescan:
+    name: Weekly rescan (npm audit + Trivy)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4
+
+      - name: npm audit (HIGH/CRITICAL)
+        working-directory: backend
+        run: npm audit --audit-level=high
+
+      - name: Build backend image
+        run: docker build -t taskvault-backend:rescan ./backend
+
+      # Trivy épinglé par digest (v0.76.2) : un tag mobile permettrait de changer l'outil à notre insu.
+      - name: Trivy scan
+        run: |
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+            aquasec/trivy@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb \
+            image taskvault-backend:rescan \
+            --severity CRITICAL,HIGH \
+            --exit-code 1 \
+            --ignore-unfixed

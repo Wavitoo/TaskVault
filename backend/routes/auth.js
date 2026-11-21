@@ -1,7 +1,9 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
+const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const pool = require('../db/pool');
+const authenticateToken = require('../middleware/auth');
 
 const router = express.Router();
 const SALT_ROUNDS = 12;
@@ -65,10 +67,26 @@ router.post('/login', async (req, res) => {
     const token = jwt.sign(
       { userId: user.id, username: user.username },
       process.env.JWT_SECRET,
-      { expiresIn: '1h' }
+      { expiresIn: '1h', jwtid: crypto.randomUUID() }
     );
 
     res.json({ token });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// POST /logout - révoque le jeton présenté : il est refusé jusqu'à sa date d'expiration naturelle
+router.post('/logout', authenticateToken, async (req, res) => {
+  try {
+    await pool.query(
+      'INSERT INTO revoked_tokens (jti, expires_at) VALUES ($1, to_timestamp($2)) ON CONFLICT (jti) DO NOTHING',
+      [req.user.jti, req.user.exp]
+    );
+    // Nettoyage opportuniste : un jeton expiré est de toute façon refusé, inutile de le garder.
+    await pool.query('DELETE FROM revoked_tokens WHERE expires_at < NOW()');
+    res.json({ message: 'Logged out' });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Internal server error' });

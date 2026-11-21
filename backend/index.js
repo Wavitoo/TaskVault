@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 const authRoutes = require('./routes/auth');
 const taskRoutes = require('./routes/tasks');
 
@@ -36,7 +37,18 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use('/api/auth', authRoutes);
+// Limite les tentatives sur /api/auth (force brute sur les mots de passe, création de comptes en masse).
+// 10 requêtes par IP et par fenêtre de 15 minutes. Le compteur est en mémoire PAR instance : avec N réplicas,
+// la limite effective est de N x 10. Un compteur partagé (Redis) serait nécessaire pour une limite exacte.
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: Number(process.env.AUTH_RATE_LIMIT) || 10,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  message: { error: 'Too many attempts, please try again later' },
+});
+
+app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/tasks', taskRoutes);
 
 app.get('/health', (req, res) => {
